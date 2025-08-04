@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "COGNIVO Docs",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#EFCE4E",
+    "light": "#FFD43B",
+    "dark": "#EFCE4E"
   },
   "favicon": "/favicon.svg",
   "navigation": {
