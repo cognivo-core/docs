@@ -1,76 +1,271 @@
 ---
 title: 'Development'
-description: 'Preview changes locally to update your docs'
+description: 'Set up your development environment for Quantum AI Agent integration'
 ---
 
 <Info>
   **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  - Programming language of choice (Python, JavaScript, etc.)
+  - Valid Quantum API Bearer token
+  - Access to the Quantum AI Agent system
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+Follow these steps to set up your development environment for integrating with the Quantum AI Agent.
 
 <Steps>
-<Step title="Install the Mintlify CLI">
+<Step title="Install required dependencies">
 
-```bash
-npm i -g mint
+Choose your preferred programming language and install the necessary HTTP client libraries:
+
+<CodeGroup>
+```bash Python
+pip install requests
+pip install python-dotenv  # For environment variables
 ```
+
+```bash JavaScript/Node.js
+npm install axios
+npm install dotenv  # For environment variables
+```
+
+```bash cURL
+# cURL is usually pre-installed on most systems
+curl --version
+```
+</CodeGroup>
 </Step>
 
-<Step title="Preview locally">
+<Step title="Set up environment variables">
 
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+Create a `.env` file in your project root to store your API credentials securely:
 
 ```bash
-mint dev
+QUANTUM_API_TOKEN=your_bearer_token_here
+QUANTUM_API_BASE_URL=https://www.cognivo.app/api/v1
+QUANTUM_AGENT_ID=5
+QUANTUM_COMPANY_ID=2
+QUANTUM_OWNER_ID=1
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+<Warning>
+Never commit your `.env` file to version control. Add it to your `.gitignore`.
+</Warning>
+</Step>
+
+<Step title="Create your first integration">
+
+Set up a basic integration to test your connection to the Quantum AI Agent:
+
+<CodeGroup>
+```python Python
+import os
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+class QuantumAPIClient:
+    def __init__(self):
+        self.base_url = os.getenv('QUANTUM_API_BASE_URL')
+        self.token = os.getenv('QUANTUM_API_TOKEN')
+        self.headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+    
+    def test_connection(self):
+        """Test API connection"""
+        try:
+            response = requests.get(f'{self.base_url}/test', headers=self.headers)
+            return response.status_code == 200
+        except Exception as e:
+            print(f"Connection failed: {e}")
+            return False
+
+# Initialize client
+client = QuantumAPIClient()
+if client.test_connection():
+    print("✅ Connected to Quantum AI Agent successfully!")
+else:
+    print("❌ Failed to connect to Quantum AI Agent")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+require('dotenv').config();
+
+class QuantumAPIClient {
+    constructor() {
+        this.baseURL = process.env.QUANTUM_API_BASE_URL;
+        this.token = process.env.QUANTUM_API_TOKEN;
+        this.headers = {
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+    
+    async testConnection() {
+        try {
+            const response = await axios.get(`${this.baseURL}/test`, {
+                headers: this.headers
+            });
+            return response.status === 200;
+        } catch (error) {
+            console.error('Connection failed:', error.message);
+            return false;
+        }
+    }
+}
+
+// Initialize client
+const client = new QuantumAPIClient();
+client.testConnection().then(success => {
+    if (success) {
+        console.log('✅ Connected to Quantum AI Agent successfully!');
+    } else {
+        console.log('❌ Failed to connect to Quantum AI Agent');
+    }
+});
+```
+</CodeGroup>
+
+</Step>
+
+<Step title="Test document upload">
+
+Create a simple test to upload a document to the Quantum AI Agent:
+
+<CodeGroup>
+```python Python
+import base64
+
+def upload_test_document(client):
+    # Create a simple text document
+    text_content = "Hello Quantum AI Agent! This is a test document."
+    base64_content = base64.b64encode(text_content.encode()).decode()
+    
+    data = {
+        "owner_id": int(os.getenv('QUANTUM_OWNER_ID')),
+        "company_id": int(os.getenv('QUANTUM_COMPANY_ID')),
+        "agent_id": int(os.getenv('QUANTUM_AGENT_ID')),
+        "documents": [
+            {
+                "name": "test-document.txt",
+                "mimetype": "text/plain",
+                "base64": base64_content
+            }
+        ]
+    }
+    
+    response = requests.post(
+        f'{client.base_url}/documents/create',
+        headers=client.headers,
+        json=data
+    )
+    
+    return response.json()
+
+# Test upload
+result = upload_test_document(client)
+print("Upload result:", result)
+```
+
+```javascript JavaScript
+async function uploadTestDocument(client) {
+    // Create a simple text document
+    const textContent = "Hello Quantum AI Agent! This is a test document.";
+    const base64Content = Buffer.from(textContent).toString('base64');
+    
+    const data = {
+        owner_id: parseInt(process.env.QUANTUM_OWNER_ID),
+        company_id: parseInt(process.env.QUANTUM_COMPANY_ID),
+        agent_id: parseInt(process.env.QUANTUM_AGENT_ID),
+        documents: [
+            {
+                name: "test-document.txt",
+                mimetype: "text/plain",
+                base64: base64Content
+            }
+        ]
+    };
+    
+    try {
+        const response = await axios.post(
+            `${client.baseURL}/documents/create`,
+            data,
+            { headers: client.headers }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Upload failed:', error.response?.data || error.message);
+        return null;
+    }
+}
+
+// Test upload
+uploadTestDocument(client).then(result => {
+    console.log('Upload result:', result);
+});
+```
+</CodeGroup>
 
 </Step>
 </Steps>
 
-## Custom ports
+## Best Practices
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+<CardGroup cols={2}>
+  <Card title="Error Handling" icon="shield-exclamation">
+    Always implement proper error handling for API calls. Check status codes and handle network failures gracefully.
+  </Card>
+  
+  <Card title="Rate Limiting" icon="clock">
+    Respect API rate limits. Implement exponential backoff for retries when encountering rate limit errors.
+  </Card>
+  
+  <Card title="Security" icon="lock">
+    Store API tokens securely using environment variables. Never hardcode credentials in your source code.
+  </Card>
+  
+  <Card title="Logging" icon="file-text">
+    Implement comprehensive logging to track API interactions and debug issues effectively.
+  </Card>
+</CardGroup>
 
-```bash
-mint dev --port 3333
-```
+## Development Tools
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+<AccordionGroup>
+  <Accordion title="API Testing Tools">
+    - **Postman**: Create and test API requests with a GUI
+    - **Insomnia**: Lightweight REST client for API testing
+    - **cURL**: Command-line tool for making HTTP requests
+    - **HTTPie**: User-friendly command-line HTTP client
+  </Accordion>
+  
+  <Accordion title="Code Examples Repository">
+    Check out our [GitHub repository](https://github.com/quantum-ai/examples) for complete integration examples in multiple programming languages.
+  </Accordion>
+  
+  <Accordion title="Development Environment">
+    - Use virtual environments (Python) or package managers (Node.js)
+    - Set up proper IDE configuration with API documentation
+    - Configure debugging tools for API interactions
+  </Accordion>
+</AccordionGroup>
 
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
+## Next Steps
 
-## Mintlify versions
+Once you have your development environment set up:
 
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+1. **Explore the API**: Review the [API Documentation](/api-reference/introduction)
+2. **Upload Documents**: Try the [Documents API](/api-reference/endpoint/documents-create)
+3. **Build Your Integration**: Start developing your custom integration
+4. **Test Thoroughly**: Ensure your integration handles all edge cases
 
-```bash
-npm mint update
-```
-
-## Validating links
-
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
-
-```bash
-mint broken-links
-```
-
-## Deployment
-
-If the deployment is successful, you should see the following:
-
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
-
-## Code formatting
+<Note>
+Need help? Check our troubleshooting guide or contact support for assistance with your Quantum AI Agent integration.
+</Note>
 
 We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
 

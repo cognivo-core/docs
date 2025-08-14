@@ -1,0 +1,404 @@
+---
+title: 'Create Documents'
+description: 'Create multiple documents in the Odoo system and associate them with a specific Quantum AI agent'
+---
+
+# Create Documents
+
+Create multiple documents in the Odoo system and associate them with a specific Quantum AI agent.
+
+## Endpoint
+
+<CodeGroup>
+```bash cURL
+POST /api/v1/documents/create
+```
+
+```javascript JavaScript
+const response = await fetch('/api/v1/documents/create', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <token>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data)
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://www.cognivo.app/api/v1/documents/create',
+    headers={'Authorization': 'Bearer <token>'},
+    json=data
+)
+```
+</CodeGroup>
+
+## Authentication
+
+<Warning>
+**Bearer Token Required**
+
+The token must be valid for `documents` endpoint and `POST` method.
+</Warning>
+
+```
+Authorization: Bearer <your_token_here>
+```
+
+## Input Parameters
+
+### Body Parameters
+
+<ParamField body="owner_id" type="integer" required>
+  Document owner ID
+</ParamField>
+
+<ParamField body="company_id" type="integer" required>
+  Company ID
+</ParamField>
+
+<ParamField body="agent_id" type="integer" required>
+  Quantum AI agent ID
+</ParamField>
+
+<ParamField body="documents" type="array" required>
+  Array of documents to create. Each document must contain:
+  
+  <Expandable title="Document structure">
+    <ParamField body="name" type="string" required>
+      File name
+    </ParamField>
+    
+    <ParamField body="mimetype" type="string" required>
+      File MIME type (e.g.: application/pdf, image/jpeg)
+    </ParamField>
+    
+    <ParamField body="base64" type="string" required>
+      File content encoded in base64
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Responses
+
+<ResponseExample>
+
+```json Success (200)
+{
+  "status": "success",
+  "message": "2 documents created successfully",
+  "created_documents": [
+    {
+      "id": 123,
+      "name": "contrato_servicio.pdf",
+      "attachment_id": 456,
+      "agent_id": 5,
+      "owner_id": 1,
+      "company_id": 2
+    },
+    {
+      "id": 124,
+      "name": "imagen_producto.jpg", 
+      "attachment_id": 457,
+      "agent_id": 5,
+      "owner_id": 1,
+      "company_id": 2
+    }
+  ],
+  "total_created": 2,
+  "agent_id": 5,
+  "company_id": 2,
+  "owner_id": 1
+}
+```
+
+```json Error 401 - Unauthorized
+{
+  "status": "error",
+  "message": "Invalid Authorization header format"
+}
+```
+
+```json Error 400 - Bad Request
+{
+  "status": "error",
+  "message": "Fields owner_id, company_id, agent_id, documents are required"
+}
+```
+
+```json Error 404 - Not Found
+{
+  "status": "not found",
+  "message": "Company not found"
+}
+```
+
+```json Error 500 - Internal Server Error
+{
+  "status": "error",
+  "message": "Unexpected error message"
+}
+```
+
+</ResponseExample>
+
+## Usage Examples
+
+### Example 1: Multiple documents
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://www.cognivo.app/api/v1/documents/create" \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "owner_id": 1,
+    "company_id": 2,
+    "agent_id": 5,
+    "documents": [
+      {
+        "name": "contrato.pdf",
+        "mimetype": "application/pdf",
+        "base64": "JVBERi0xLjQKJcOkw7zDtsO4..."
+      },
+      {
+        "name": "imagen.jpg",
+        "mimetype": "image/jpeg", 
+        "base64": "/9j/4AAQSkZJRgABAQEAYABgAAD..."
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+import base64
+
+def upload_documents(token, owner_id, company_id, agent_id, file_paths):
+    """
+    Upload multiple documents to the system
+    """
+    url = "https://www.cognivo.app/api/v1/documents/create"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    documents = []
+    
+    for file_path in file_paths:
+        # Read file and convert to base64
+        with open(file_path, 'rb') as file:
+            base64_content = base64.b64encode(file.read()).decode('utf-8')
+        
+        # Determine mimetype
+        if file_path.endswith('.pdf'):
+            mimetype = 'application/pdf'
+        elif file_path.endswith(('.jpg', '.jpeg')):
+            mimetype = 'image/jpeg'
+        elif file_path.endswith('.png'):
+            mimetype = 'image/png'
+        elif file_path.endswith('.txt'):
+            mimetype = 'text/plain'
+        else:
+            mimetype = 'application/octet-stream'
+        
+        documents.append({
+            "name": file_path.split('/')[-1],
+            "mimetype": mimetype,
+            "base64": base64_content
+        })
+    
+    data = {
+        "owner_id": owner_id,
+        "company_id": company_id,
+        "agent_id": agent_id,
+        "documents": documents
+    }
+    
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+
+# Usage
+result = upload_documents(
+    token="tu_token_aqui",
+    owner_id=1,
+    company_id=2,
+    agent_id=5,
+    file_paths=[
+        "/path/to/documento1.pdf",
+        "/path/to/imagen1.jpg"
+    ]
+)
+```
+
+```javascript JavaScript
+async function uploadDocuments(token, ownerID, companyID, agentID, files) {
+  const documents = [];
+  
+  for (const file of files) {
+    const base64 = await fileToBase64(file);
+    documents.push({
+      name: file.name,
+      mimetype: file.type,
+      base64: base64
+    });
+  }
+  
+  const response = await fetch('/api/v1/documents/create', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      owner_id: ownerID,
+      company_id: companyID,
+      agent_id: agentID,
+      documents: documents
+    })
+  });
+  
+  return await response.json();
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = error => reject(error);
+  });
+}
+```
+
+</CodeGroup>
+
+### Example 2: Simple text document
+
+<CodeGroup>
+
+```json Request Body
+{
+  "owner_id": 1,
+  "company_id": 2,
+  "agent_id": 5,
+  "documents": [
+    {
+      "name": "notas.txt",
+      "mimetype": "text/plain",
+      "base64": "SG9sYSBtdW5kbyEgRXN0ZSBlcyB1biBhcmNoaXZvIGRlIHRleHRvLg=="
+    }
+  ]
+}
+```
+
+```json Response
+{
+  "status": "success",
+  "message": "1 documents created successfully",
+  "created_documents": [
+    {
+      "id": 125,
+      "name": "notas.txt",
+      "attachment_id": 458,
+      "agent_id": 5,
+      "owner_id": 1,
+      "company_id": 2
+    }
+  ],
+  "total_created": 1,
+  "agent_id": 5,
+  "company_id": 2,
+  "owner_id": 1
+}
+```
+
+</CodeGroup>
+
+## Common MIME Types
+
+<AccordionGroup>
+  <Accordion title="Documents">
+    - **PDF**: `application/pdf`
+    - **Word**: `application/msword`
+    - **Word (nuevo)**: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+    - **Excel**: `application/vnd.ms-excel`
+    - **Excel (nuevo)**: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  </Accordion>
+  
+  <Accordion title="Images">
+    - **JPEG**: `image/jpeg`
+    - **PNG**: `image/png`
+    - **GIF**: `image/gif`
+    - **WebP**: `image/webp`
+  </Accordion>
+  
+  <Accordion title="Text and Others">
+    - **Plain text**: `text/plain`
+    - **ZIP**: `application/zip`
+    - **JSON**: `application/json`
+    - **XML**: `application/xml`
+  </Accordion>
+</AccordionGroup>
+
+## Important Considerations
+
+<CardGroup cols={2}>
+  <Card title="Validations" icon="shield-check">
+    - All required fields must be present
+    - IDs must be valid integers
+    - The `documents` array cannot be empty
+    - Base64 content must be valid
+    - Company, Agent and Owner must exist
+  </Card>
+  
+  <Card title="Behavior" icon="gear">
+    - Individual processing per document
+    - Automatic logging of errors and successes
+    - Automatic linking to agent
+    - Creation in attachment and document
+  </Card>
+  
+  <Card title="Limits" icon="gauge">
+    - Consider size limits for large files
+    - No specific limit on number of documents
+    - Possible timeouts on large requests
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title='Error: "Invalid base64 content"'>
+    **Solution:** Verify that the base64 content is valid
+    
+    ```python
+    import base64
+    try:
+        base64.b64decode(base64_content)
+        print("Valid base64")
+    except Exception as e:
+        print(f"Invalid base64: {e}")
+    ```
+  </Accordion>
+  
+  <Accordion title='Error: "Agent not found"'>
+    **Solution:** Verify that the agent exists and is active:
+    - The agent must have `active = True`
+    - The ID must be correct
+  </Accordion>
+  
+  <Accordion title='Error: "Owner not found"'>
+    **Solution:** Contact your system administrator to verify the owner ID and ensure proper user access permissions.
+  </Accordion>
+</AccordionGroup>
+
+<Info>
+**Version:** 1.0  
+**Last updated:** 2025-01-13
+</Info>

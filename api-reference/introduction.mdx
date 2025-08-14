@@ -1,33 +1,61 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Introduction'
+description: 'Quantum AI Agent Management and Interaction API'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to Quantum API
 
-## Welcome
-
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+The Quantum API provides comprehensive management and interaction capabilities with our advanced AI model. This API enables seamless integration with the Quantum AI model, allowing you to manage documents, process data, and leverage intelligent automation capabilities.
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="Quantum AI Model"
+  icon="robot"
+  href="/api-reference/endpoint/documents-create"
 >
-  View the OpenAPI specification file
+  Start with document management endpoints
 </Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints require authentication using Bearer tokens. Every request must include a valid authorization header to access the Quantum AI model functionality.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+<Warning>
+**Bearer Token Required**
+
+All interactions with the Quantum API require a valid Bearer token in the Authorization header.
+</Warning>
+
+```bash
+Authorization: Bearer <your_token_here>
 ```
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Document Management" icon="file-text">
+    Upload, process, and manage documents with the Quantum AI model
+  </Card>
+  
+  <Card title="AI Integration" icon="brain">
+    Leverage advanced Quantum AI model capabilities for data processing
+  </Card>
+  
+  <Card title="Secure Access" icon="shield">
+    All endpoints protected with Bearer token authentication
+  </Card>
+  
+  <Card title="Real-time Processing" icon="zap">
+    Fast and efficient document and data processing with AI
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+1. **Obtain your Bearer token** from the Quantum dashboard
+2. **Include the token** in all API requests
+3. **Start with document management** to upload and process files
+4. **Explore Quantum AI model capabilities** through various endpoints
+
+<Note>
+The Quantum API is designed for seamless integration with existing systems while providing powerful AI model-driven functionality.
+</Note>
