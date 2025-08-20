@@ -1,0 +1,224 @@
+---
+title: 'Get Agents'
+description: 'Retrieve all active agents for a specific company using company ID and Cognivo code'
+---
+
+# Agents
+
+Retrieve all active agents for a specific company using company ID and Cognivo code.
+
+## Endpoint
+
+<CodeGroup>
+```bash cURL
+POST /api/v1/agent/get_by_company
+```
+
+```javascript JavaScript
+const response = await fetch('/api/v1/agent/get_by_company', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <token>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data)
+});
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://www.cognivo.app/api/v1/agent/get_by_company',
+    headers={'Authorization': 'Bearer <token>'},
+    json=data
+)
+```
+</CodeGroup>
+
+## Authentication
+
+<Warning>
+**Bearer Token Required**
+
+The token must be valid for `agent` endpoint and `POST` method.
+</Warning>
+
+```
+Authorization: Bearer <your_token_here>
+```
+
+## Input Parameters
+
+### Body Parameters
+
+<ParamField body="company_id" type="integer" required>
+  Unique identifier of the company
+</ParamField>
+
+<ParamField body="code" type="string" required>
+  Cognivo code of the company (must be non-empty)
+</ParamField>
+
+## Responses
+
+<ResponseExample>
+
+```json Success (200)
+{
+  "status": "success",
+  "company_id": 1,
+  "company_name": "Demo Company",
+  "cognivo_code": "COGNIVO_DEMO",
+  "agents": [
+    {
+      "id": 5,
+      "name": "Sales Agent",
+      "description": "Agent specialized in sales and customer service"
+    },
+    {
+      "id": 8,
+      "name": "Support Agent",
+      "description": "Agent for technical support and problem resolution"
+    }
+  ],
+  "total_agents": 2
+}
+```
+
+```json Error 401 - Unauthorized
+{
+  "status": "error",
+  "message": "Invalid Authorization header format"
+}
+```
+
+```json Error 400 - Bad Request
+{
+  "status": "error",
+  "message": "Fields company_id and code are required"
+}
+```
+
+```json Error 404 - Not Found
+{
+  "status": "not found",
+  "message": "Company not found"
+}
+```
+
+```json Error 500 - Internal Server Error
+{
+  "status": "error",
+  "message": "Internal server error description"
+}
+```
+
+</ResponseExample>
+
+### Example 1: Get company agents
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://www.cognivo.app/api/v1/agent/get_by_company" \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "company_id": 1,
+    "code": "COGNIVO_DEMO"
+  }'
+```
+
+```python Python
+import requests
+
+def get_agents_by_company():
+    url = "https://www.cognivo.app/api/v1/agent/get_by_company"
+    headers = {
+        "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "company_id": 1,
+        "code": "COGNIVO_DEMO"
+    }
+    
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+
+result = get_agents_by_company()
+print(f"Found {result['total_agents']} agents")
+```
+
+```javascript JavaScript
+const getAgentsByCompany = async () => {
+  const response = await fetch('https://www.cognivo.app/api/v1/agent/get_by_company', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      company_id: 1,
+      code: "COGNIVO_DEMO"
+    })
+  });
+  
+  const result = await response.json();
+  console.log(`Found ${result.total_agents} agents`);
+  return result;
+};
+```
+
+</CodeGroup>
+
+## Important Considerations
+
+<CardGroup cols={2}>
+  <Card title="Validations" icon="shield-check">
+    - Bearer token must be valid and properly formatted
+    - company_id must be a valid integer
+    - code must be a non-empty string
+    - Company must exist with provided ID and code
+  </Card>
+  
+  <Card title="Behavior" icon="gear">
+    - Returns only active agents
+    - Agent descriptions are HTML cleaned
+    - Results are filtered by company ownership
+    - Empty results return valid response with 0 agents
+  </Card>
+  
+  <Card title="Limits" icon="gauge">
+    - Fast lookup using indexed company fields
+    - Efficient agent filtering by active status
+    - No specific limit on number of agents returned
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title='Error: "Company not found"'>
+    **Solution:** Contact your system administrator to verify the company ID and code combination.
+  </Accordion>
+  
+  <Accordion title='Error: "Fields company_id and code are required"'>
+    **Solution:** Ensure both company_id and code are included in the request body.
+  </Accordion>
+  
+  <Accordion title='Error: "Invalid Authorization header format"'>
+    **Solution:** Check that your Authorization header follows the format: `Bearer {token}`.
+  </Accordion>
+  
+  <Accordion title="No agents returned">
+    **Solution:** This is normal if the company has no active agents. Contact your system administrator to verify agent status.
+  </Accordion>
+</AccordionGroup>
+
+<Info>
+**Version:** 1.0  
+**Last updated:** 2025-01-13
+</Info>

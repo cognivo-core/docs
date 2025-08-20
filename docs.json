@@ -33,6 +33,12 @@
             ]
           },
           {
+            "group": "Agents API",
+            "pages": [
+              "api-reference/endpoint/agents-get-by-company"
+            ]
+          },
+          {
             "group": "Documents API",
             "pages": [
               "api-reference/endpoint/documents-create"
